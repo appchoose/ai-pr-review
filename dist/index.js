@@ -39684,7 +39684,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = run;
 const core = __importStar(__nccwpck_require__(2186));
 const openai_1 = __importDefault(__nccwpck_require__(47));
-const github_1 = __importDefault(__nccwpck_require__(5438));
+const github = __importStar(__nccwpck_require__(5438));
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
@@ -39696,7 +39696,7 @@ async function run() {
             core.setFailed('Missing OPENAI_API_KEY env var');
             return;
         }
-        const octokit = github_1.default.getOctokit(core.getInput('github_token'));
+        const octokit = github.getOctokit(core.getInput('github_token'));
         const { data: pullRequest } = await octokit.rest.pulls.get({
             owner: 'appchoose',
             repo: 'backend',
