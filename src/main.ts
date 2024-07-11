@@ -21,7 +21,7 @@ export async function run(): Promise<void> {
     const chatResult = await openai.chat.completions
       .create({
         messages: [{ role: 'user', content: prompt }],
-        model: core.getInput('model')
+        model: core.getInput('openai_model')
       })
       .asResponse()
 
