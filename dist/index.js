@@ -39683,8 +39683,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = run;
 const core = __importStar(__nccwpck_require__(2186));
-const openai_1 = __importDefault(__nccwpck_require__(47));
 const github = __importStar(__nccwpck_require__(5438));
+const openai_1 = __importDefault(__nccwpck_require__(47));
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
@@ -39705,7 +39705,7 @@ async function run() {
                 format: 'diff'
             }
         });
-        core.setOutput('octokit', pullRequest);
+        console.log('octokit', pullRequest);
         const openai = new openai_1.default({
             apiKey: process.env['OPENAI_API_KEY']
         });
@@ -39717,6 +39717,7 @@ async function run() {
             .asResponse();
         const response = await chatResult.json();
         core.setOutput('chatResult', response.choices[0]?.message.content ?? undefined);
+        console.log('chatResult', response.choices[0]?.message.content ?? undefined);
         // todo rajouter un label en fonction du locking ou non
     }
     catch (error) {

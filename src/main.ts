@@ -26,7 +26,7 @@ export async function run(): Promise<void> {
       }
     })
 
-    core.setOutput('octokit', pullRequest)
+    console.log('octokit', pullRequest)
 
     const openai = new OpenAI({
       apiKey: process.env['OPENAI_API_KEY']
@@ -45,6 +45,8 @@ export async function run(): Promise<void> {
       'chatResult',
       response.choices[0]?.message.content ?? undefined
     )
+
+    console.log('chatResult', response.choices[0]?.message.content ?? undefined)
 
     // todo rajouter un label en fonction du locking ou non
   } catch (error) {
