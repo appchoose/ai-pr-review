@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import { wait } from './wait'
+import OpenAI from 'openai'
 
 /**
  * The main function for the action.
@@ -7,19 +7,30 @@ import { wait } from './wait'
  */
 export async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
+    const prompt: string = core.getInput('prompt')
 
-    // Debug logs are only output if the `ACTIONS_STEP_DEBUG` secret is true
-    core.debug(`Waiting ${ms} milliseconds ...`)
+    if (!process.env['OPENAI_API_KEY']) {
+      core.setFailed('Missing OPENAI_API_KEY env var')
+      return
+    }
 
-    // Log the current timestamp, wait, then log the new timestamp
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
-    core.info('test chris')
+    const openai = new OpenAI({
+      apiKey: process.env['OPENAI_API_KEY']
+    })
 
-    // Set outputs for other workflow steps to use
-    core.setOutput('time', new Date().toTimeString())
+    const chatResult = await openai.chat.completions
+      .create({
+        messages: [{ role: 'user', content: prompt }],
+        model: core.getInput('model')
+      })
+      .asResponse()
+
+    const response = await chatResult.json()
+
+    core.setOutput(
+      'chatResult',
+      response.choices[0]?.message.content ?? undefined
+    )
   } catch (error) {
     // Fail the workflow run if an error occurs
     if (error instanceof Error) core.setFailed(error.message)
