@@ -1,5 +1,6 @@
 import * as core from '@actions/core'
 import OpenAI from 'openai'
+import github from '@actions/github'
 
 /**
  * The main function for the action.
@@ -13,6 +14,19 @@ export async function run(): Promise<void> {
       core.setFailed('Missing OPENAI_API_KEY env var')
       return
     }
+
+    const octokit = github.getOctokit(core.getInput('github_token'))
+
+    const { data: pullRequest } = await octokit.rest.pulls.get({
+      owner: 'appchoose',
+      repo: 'backend',
+      pull_number: core.getInput('github_pr_id') as unknown as number,
+      mediaType: {
+        format: 'diff'
+      }
+    })
+
+    core.setOutput('octokit', pullRequest)
 
     const openai = new OpenAI({
       apiKey: process.env['OPENAI_API_KEY']
@@ -31,6 +45,8 @@ export async function run(): Promise<void> {
       'chatResult',
       response.choices[0]?.message.content ?? undefined
     )
+
+    // todo rajouter un label en fonction du locking ou non
   } catch (error) {
     // Fail the workflow run if an error occurs
     if (error instanceof Error) core.setFailed(error.message)
