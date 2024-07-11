@@ -9,18 +9,12 @@ branding:
 
 # Define your inputs here.
 inputs:
-  openai_api_key:
-    description: 'OpenAI API Key'
-    required: true
-    default: ''
   github_token:
     description: 'Github API Key'
     required: true
-    default: ''
   github_pr_id:
     description: 'Github PR ID'
     required: true
-    default: ''
   prompt:
     description: 'Prompt to use for generating responses.'
     required: true
