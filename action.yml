@@ -45,9 +45,6 @@ inputs:
     required: false
     default: 'en' # English as the default language
 
-# Define your outputs here.
-outputs:
-
 runs:
   using: node20
   main: dist/index.js
