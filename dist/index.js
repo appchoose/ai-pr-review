@@ -35429,7 +35429,7 @@ async function run() {
         const chatResult = await openai.chat.completions
             .create({
             messages: [{ role: 'user', content: prompt }],
-            model: 'gpt-3.5-turbo'
+            model: core.getInput('model')
         })
             .asResponse();
         const response = await chatResult.json();
