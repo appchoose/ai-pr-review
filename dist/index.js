@@ -39649,6 +39649,73 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
+/***/ 978:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.OctokitClient = void 0;
+const github_1 = __nccwpck_require__(5438);
+const core_1 = __nccwpck_require__(2186);
+class OctokitClient {
+    octokit;
+    repo;
+    owner;
+    pullRequestId;
+    constructor(options) {
+        this.octokit = (0, github_1.getOctokit)(options.authToken);
+        this.repo = options.repo;
+        this.owner = options.owner;
+        this.pullRequestId = Number(options.pullRequestId);
+    }
+    async getAuthenticatedUserId() {
+        return (await this.octokit.rest.users.getAuthenticated()).data.id;
+    }
+    async upsertComment(comment) {
+        const comments = await this.octokit.rest.issues.listComments({
+            owner: this.owner,
+            repo: this.repo,
+            issue_number: this.pullRequestId
+        });
+        const myComments = comments.data.filter(async (commentToFilter) => commentToFilter.user?.id === (await this.getAuthenticatedUserId()));
+        if (myComments.length > 0) {
+            await this.octokit.rest.issues.updateComment({
+                owner: this.owner,
+                repo: this.repo,
+                issue_number: this.pullRequestId,
+                body: comment,
+                comment_id: myComments[0].id
+            });
+            (0, core_1.info)(`Updated comment ${myComments[0].id}.`);
+        }
+        else {
+            const result = await this.octokit.rest.issues.createComment({
+                owner: this.owner,
+                repo: this.repo,
+                issue_number: this.pullRequestId,
+                body: comment
+            });
+            (0, core_1.info)(`Added new comment ${result.data.id}.`);
+        }
+    }
+    async listFiles() {
+        const { data: files } = await this.octokit.rest.pulls.listFiles({
+            owner: this.owner,
+            repo: this.repo,
+            pull_number: this.pullRequestId,
+            mediaType: {
+                format: 'json'
+            }
+        });
+        return files;
+    }
+}
+exports.OctokitClient = OctokitClient;
+
+
+/***/ }),
+
 /***/ 399:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -39683,41 +39750,50 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = run;
 const core = __importStar(__nccwpck_require__(2186));
-const github = __importStar(__nccwpck_require__(5438));
 const openai_1 = __importDefault(__nccwpck_require__(47));
+const github_1 = __nccwpck_require__(978);
 /**
  * The main function for the action.
  * @returns {Promise<void>} Resolves when the action is complete.
  */
 async function run() {
     try {
-        const prompt = core.getInput('prompt');
+        const prompt = core.getInput('prompt') || process.env['PROMPT'];
         if (!process.env['OPENAI_API_KEY']) {
             core.setFailed('Missing OPENAI_API_KEY env var');
             return;
         }
-        const octokit = github.getOctokit(core.getInput('github_token'));
-        const { data: pullRequest } = await octokit.rest.pulls.get({
-            owner: 'appchoose',
-            repo: 'backend',
-            pull_number: core.getInput('github_pr_id'),
-            mediaType: {
-                format: 'diff'
-            }
+        const octokit = new github_1.OctokitClient({
+            authToken: core.getInput('github_token') ||
+                process.env['GITHUB_TOKEN_ID'],
+            owner: core.getInput('github_owner') ||
+                process.env['GITHUB_OWNER'],
+            repo: core.getInput('github_repo') || process.env['GITHUB_REPO'],
+            pullRequestId: core.getInput('github_pr_id') || process.env['GITHUB_PR_ID']
         });
-        console.log('octokit', pullRequest);
+        const files = await octokit.listFiles();
+        let filesContent = '';
+        // eslint-disable-next-line github/array-foreach
+        files
+            .filter(file => file.filename.startsWith(core.getInput('file_path') || process.env['FILES_PATH']))
+            .forEach(modifiedFile => {
+            filesContent += modifiedFile.patch;
+        });
         const openai = new openai_1.default({
             apiKey: process.env['OPENAI_API_KEY']
         });
+        const finalPrompt = `${prompt} ${filesContent}`;
         const chatResult = await openai.chat.completions
             .create({
-            messages: [{ role: 'user', content: prompt }],
-            model: core.getInput('openai_model')
+            messages: [{ role: 'user', content: finalPrompt }],
+            model: core.getInput('openai_model') ||
+                process.env['OPENAI_MODEL']
         })
             .asResponse();
         const response = await chatResult.json();
         core.setOutput('chatResult', response.choices[0]?.message.content ?? undefined);
-        console.log('chatResult', response.choices[0]?.message.content ?? undefined);
+        const chatResultResponse = response.choices[0]?.message.content ?? 'No response from Chat GPT :(';
+        await octokit.upsertComment(chatResultResponse);
         // todo rajouter un label en fonction du locking ou non
     }
     catch (error) {
