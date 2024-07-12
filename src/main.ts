@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
-import * as github from '@actions/github'
 import OpenAI from 'openai'
+import { OctokitClient } from './github'
 
 /**
  * The main function for the action.
@@ -8,34 +8,52 @@ import OpenAI from 'openai'
  */
 export async function run(): Promise<void> {
   try {
-    const prompt: string = core.getInput('prompt')
+    const prompt: string =
+      core.getInput('prompt') || (process.env['PROMPT'] as string)
 
     if (!process.env['OPENAI_API_KEY']) {
       core.setFailed('Missing OPENAI_API_KEY env var')
       return
     }
 
-    const octokit = github.getOctokit(core.getInput('github_token'))
-
-    const { data: pullRequest } = await octokit.rest.pulls.get({
-      owner: 'appchoose',
-      repo: 'backend',
-      pull_number: core.getInput('github_pr_id') as unknown as number,
-      mediaType: {
-        format: 'diff'
-      }
+    const octokit = new OctokitClient({
+      authToken:
+        core.getInput('github_token') ||
+        (process.env['GITHUB_TOKEN_ID'] as string),
+      owner:
+        core.getInput('github_owner') ||
+        (process.env['GITHUB_OWNER'] as string),
+      repo:
+        core.getInput('github_repo') || (process.env['GITHUB_REPO'] as string),
+      pullRequestId:
+        core.getInput('github_pr_id') || (process.env['GITHUB_PR_ID'] as string)
     })
 
-    console.log('octokit', pullRequest)
+    const files = await octokit.listFiles()
+    let filesContent = ''
+
+    // eslint-disable-next-line github/array-foreach
+    files
+      .filter(file =>
+        file.filename.startsWith(
+          core.getInput('file_path') || (process.env['FILES_PATH'] as string)
+        )
+      )
+      .forEach(modifiedFile => {
+        filesContent += modifiedFile.patch
+      })
 
     const openai = new OpenAI({
       apiKey: process.env['OPENAI_API_KEY']
     })
 
+    const finalPrompt = `${prompt} ${filesContent}`
     const chatResult = await openai.chat.completions
       .create({
-        messages: [{ role: 'user', content: prompt }],
-        model: core.getInput('openai_model')
+        messages: [{ role: 'user', content: finalPrompt }],
+        model:
+          core.getInput('openai_model') ||
+          (process.env['OPENAI_MODEL'] as string)
       })
       .asResponse()
 
@@ -45,8 +63,9 @@ export async function run(): Promise<void> {
       'chatResult',
       response.choices[0]?.message.content ?? undefined
     )
-
-    console.log('chatResult', response.choices[0]?.message.content ?? undefined)
+    const chatResultResponse =
+      response.choices[0]?.message.content ?? 'No response from Chat GPT :('
+    await octokit.upsertComment(chatResultResponse)
 
     // todo rajouter un label en fonction du locking ou non
   } catch (error) {
