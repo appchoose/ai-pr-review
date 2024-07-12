@@ -32,9 +32,9 @@ export class OctokitClient {
       issue_number: this.pullRequestId
     })
 
+    const authenticatedUserId = await this.getAuthenticatedUserId()
     const myComments = comments.data.filter(
-      async commentToFilter =>
-        commentToFilter.user?.id === (await this.getAuthenticatedUserId())
+      commentToFilter => commentToFilter.user?.id === authenticatedUserId
     )
 
     if (myComments.length > 0) {

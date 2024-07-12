@@ -36,7 +36,7 @@ export async function run(): Promise<void> {
     files
       .filter(file =>
         file.filename.startsWith(
-          core.getInput('file_path') || (process.env['FILES_PATH'] as string)
+          core.getInput('files_path') || (process.env['FILES_PATH'] as string)
         )
       )
       .forEach(modifiedFile => {

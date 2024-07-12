@@ -39678,7 +39678,8 @@ class OctokitClient {
             repo: this.repo,
             issue_number: this.pullRequestId
         });
-        const myComments = comments.data.filter(async (commentToFilter) => commentToFilter.user?.id === (await this.getAuthenticatedUserId()));
+        const authenticatedUserId = await this.getAuthenticatedUserId();
+        const myComments = comments.data.filter(commentToFilter => commentToFilter.user?.id === authenticatedUserId);
         if (myComments.length > 0) {
             await this.octokit.rest.issues.updateComment({
                 owner: this.owner,
@@ -39775,7 +39776,7 @@ async function run() {
         let filesContent = '';
         // eslint-disable-next-line github/array-foreach
         files
-            .filter(file => file.filename.startsWith(core.getInput('file_path') || process.env['FILES_PATH']))
+            .filter(file => file.filename.startsWith(core.getInput('files_path') || process.env['FILES_PATH']))
             .forEach(modifiedFile => {
             filesContent += modifiedFile.patch;
         });
