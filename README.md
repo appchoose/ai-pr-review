@@ -2,6 +2,8 @@
 
 ## Usage
 
+> [!WARNING] A GitHub token with at least `read:user, repo` scopes is needed.
+
 1. Detect if your SQL migration will lock your database
    ```yaml
    - name: Generate prompt

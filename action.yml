@@ -18,8 +18,7 @@ inputs:
     required: true
   openai_model:
     description:
-      "The OpenAI model to use for generating responses. Examples:
-      'gpt-3.5-turbo', 'gpt-4'"
+      "The OpenAI model to use for generating responses. Examples: 'gpt-3.5-turbo', 'gpt-4'"
     required: false
     default: 'gpt-3.5-turbo'
   files_path:
@@ -27,15 +26,13 @@ inputs:
     required: true
   openai_temperature:
     description:
-      'The temperature for OpenAI responses. Controls the creativity of the
-      responses. Higher values (e.g., 0.9) make output more random, while lower
-      values (e.g., 0.1) make it more focused and deterministic.'
+      'The temperature for OpenAI responses. Controls the creativity of the responses. Higher values
+      (e.g., 0.9) make output more random, while lower values (e.g., 0.1) make it more focused and
+      deterministic.'
     required: false
     default: '0.5'
   openai_max_tokens:
-    description:
-      'The maximum number of tokens to generate in the OpenAI response. Example:
-      1000'
+    description: 'The maximum number of tokens to generate in the OpenAI response. Example: 1000'
     required: false
     default: '2048'
   language:

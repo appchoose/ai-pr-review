@@ -55,9 +55,7 @@ export class OctokitClient {
     }
   }
 
-  async listFiles(): Promise<
-    { filename: string; patch?: string | undefined }[]
-  > {
+  async listFiles(): Promise<{ filename: string; patch?: string | undefined }[]> {
     const { data: files } = await this.octokit.rest.pulls.listFiles({
       owner: this.owner,
       repo: this.repo,

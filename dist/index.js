@@ -39759,18 +39759,16 @@ const github_1 = __nccwpck_require__(978);
  */
 async function run() {
     try {
-        const prompt = core.getInput('prompt') || process.env['PROMPT'];
         if (!process.env['OPENAI_API_KEY']) {
             core.setFailed('Missing OPENAI_API_KEY env var');
             return;
         }
         const octokit = new github_1.OctokitClient({
-            authToken: core.getInput('github_token') ||
-                process.env['GITHUB_TOKEN_ID'],
+            authToken: core.getInput('github_token') || process.env['GITHUB_TOKEN_ID'],
             pullRequestId: core.getInput('github_pr_id') || process.env['GITHUB_PR_ID']
         });
-        const files = await octokit.listFiles();
         let concatenatedFilesContent = '';
+        const files = await octokit.listFiles();
         // eslint-disable-next-line github/array-foreach
         files
             .filter(file => file.filename.startsWith(core.getInput('files_path') || process.env['FILES_PATH']))
@@ -39778,33 +39776,43 @@ async function run() {
             concatenatedFilesContent += modifiedFile.patch;
         });
         if (!concatenatedFilesContent) {
-            core.info('Nothing to analyze');
+            core.info('No files is matching the given files_path.');
             return;
         }
-        const openai = new openai_1.default({
-            apiKey: process.env['OPENAI_API_KEY']
-        });
-        const finalPrompt = `${prompt} ${concatenatedFilesContent}`;
-        const chatResult = await openai.chat.completions
-            .create({
-            messages: [{ role: 'user', content: finalPrompt }],
-            model: core.getInput('openai_model') ||
-                process.env['OPENAI_MODEL'],
-            temperature: Number(core.getInput('openai_temperature'))
-        })
-            .asResponse();
-        const response = await chatResult.json();
-        core.setOutput('chatResult', response.choices[0]?.message.content ?? undefined);
-        const chatResultResponse = response.choices[0]?.message.content ?? 'No response from Chat GPT :(';
+        const finalPrompt = generatePrompt(concatenatedFilesContent);
+        const promptResponse = await executePrompt(finalPrompt);
+        core.setOutput('chatResult', promptResponse.choices[0]?.message.content ?? undefined);
+        const chatResultResponse = promptResponse.choices[0]?.message.content ?? 'No response from Chat GPT :(';
         await octokit.upsertComment(chatResultResponse);
-        // todo rajouter un label en fonction du locking ou non
     }
     catch (error) {
-        // Fail the workflow run if an error occurs
         if (error instanceof Error)
             core.setFailed(error.message);
     }
 }
+const generatePrompt = (contentToAnalyze) => {
+    const prompt = `
+    ${core.getInput('prompt') || process.env['PROMPT']} \n\n
+    Content : ${contentToAnalyze} \n\n
+    Answer me in the following ${core.getInput('language')}:\n\n
+    Use markdown formatting for your response
+  `;
+    return prompt;
+};
+const executePrompt = async (prompt) => {
+    const openai = new openai_1.default({
+        apiKey: process.env['OPENAI_API_KEY']
+    });
+    const chatResult = await openai.chat.completions
+        .create({
+        messages: [{ role: 'user', content: prompt }],
+        model: core.getInput('openai_model') || process.env['OPENAI_MODEL'],
+        temperature: Number(core.getInput('openai_temperature')),
+        max_tokens: Number(core.getInput('openai_max_tokens'))
+    })
+        .asResponse();
+    return chatResult.json();
+};
 
 
 /***/ }),
