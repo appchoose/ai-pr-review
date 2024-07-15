@@ -39811,6 +39811,7 @@ const executePrompt = async (prompt) => {
         });
     }
     messages.push({ role: 'user', content: prompt });
+    core.info('Calling OpenAI...');
     const chatResult = await openai.chat.completions
         .create({
         messages,

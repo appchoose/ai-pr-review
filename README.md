@@ -1,12 +1,13 @@
 # AI Pull Request Review
 
-The bot will create and try to update if existing a comment with OpenAI result.
+This action has been created to use OpenAI API to performs some custom analysis on pull request.  
+The bot will create and try to update (if existing) a comment with OpenAI result.
 
 ## Usage
 
 > [!WARNING] A GitHub token with at least `read:user, repo` scopes is needed.
 
-1. Detect if your SQL migration will lock your database
+1. Detect if your SQL migration will lock your database :
 
    ```yaml
          review-sql-migration:
