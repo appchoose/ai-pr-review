@@ -52,9 +52,10 @@ export async function run(): Promise<void> {
 const generatePrompt = (contentToAnalyze: string): string => {
   const prompt = `
     ${core.getInput('prompt') || (process.env['PROMPT'] as string)} \n\n
-    Content : \n \`\`\`${contentToAnalyze}\`\`\`\n\n
     Answer me in the following language ${core.getInput('language')}:\n\n
     Use markdown formatting for your response.\n\n
+    Content : \n \`\`\`${contentToAnalyze}\`\`\`\n\n
+    
   `
 
   core.info(`Prompt: ${prompt}`)
