@@ -29,7 +29,7 @@ export async function run(): Promise<void> {
         )
       )
       .forEach(modifiedFile => {
-        concatenatedFilesContent += modifiedFile.patch
+        concatenatedFilesContent += modifiedFile.patch?.replace(/@@(.*)+@@/, '').trim()
       })
 
     if (!concatenatedFilesContent) {
@@ -52,7 +52,8 @@ export async function run(): Promise<void> {
 const generatePrompt = (contentToAnalyze: string): string => {
   const prompt = `
     ${core.getInput('prompt') || (process.env['PROMPT'] as string)} \n\n
-    Content : ${contentToAnalyze} \n\n
+    Content : \n 
+    \`\`\`${contentToAnalyze}\`\`\`\n\n
     Answer me in the following ${core.getInput('language')}:\n\n
     Use markdown formatting for your response
   `

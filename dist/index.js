@@ -39773,7 +39773,7 @@ async function run() {
         files
             .filter(file => file.filename.startsWith(core.getInput('files_path') || process.env['FILES_PATH']))
             .forEach(modifiedFile => {
-            concatenatedFilesContent += modifiedFile.patch;
+            concatenatedFilesContent += modifiedFile.patch?.replace(/@@(.*)+@@/, '').trim();
         });
         if (!concatenatedFilesContent) {
             core.info('No files is matching the given files_path.');
@@ -39793,7 +39793,8 @@ async function run() {
 const generatePrompt = (contentToAnalyze) => {
     const prompt = `
     ${core.getInput('prompt') || process.env['PROMPT']} \n\n
-    Content : ${contentToAnalyze} \n\n
+    Content : \n 
+    \`\`\`${contentToAnalyze}\`\`\`\n\n
     Answer me in the following ${core.getInput('language')}:\n\n
     Use markdown formatting for your response
   `;
