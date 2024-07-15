@@ -57,7 +57,11 @@ jobs:
         id: test-action
         uses: ./
         with:
-          milliseconds: 2000
+          prompt: This will not work
+          github_pr_id: 123
+          github_token: dummy
+        env:
+          OPENAI_API_KEY: dummy
 
       - name: Print Output
         id: output
