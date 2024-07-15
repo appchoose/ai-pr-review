@@ -39807,7 +39807,10 @@ const executePrompt = async (prompt) => {
     });
     const chatResult = await openai.chat.completions
         .create({
-        messages: [{ role: 'user', content: prompt }],
+        messages: [
+            { role: "system", content: "You are a SQL expert and knowledgeable about large datasets in Postgres version 15." },
+            { role: 'user', content: prompt }
+        ],
         model: core.getInput('openai_model') || process.env['OPENAI_MODEL'],
         temperature: Number(core.getInput('openai_temperature')),
         max_tokens: Number(core.getInput('openai_max_tokens'))
