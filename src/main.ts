@@ -40,7 +40,6 @@ export async function run(): Promise<void> {
 
     const finalPrompt = generatePrompt(concatenatedFilesContent)
     const promptResponse = await executePrompt(finalPrompt)
-
     core.setOutput('chatResult', promptResponse.choices[0]?.message.content ?? undefined)
     const chatResultResponse =
       promptResponse.choices[0]?.message.content ?? 'No response from Chat GPT :('

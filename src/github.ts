@@ -43,7 +43,7 @@ export class OctokitClient {
         body: comment,
         comment_id: myComments[0].id
       })
-      info(`Updated comment ${myComments[0].id}.`)
+      info(`Updated comment : ${myComments[0].id}.`)
     } else {
       const result = await this.octokit.rest.issues.createComment({
         owner: this.owner,
@@ -51,7 +51,7 @@ export class OctokitClient {
         issue_number: this.pullRequestId,
         body: comment
       })
-      info(`Added new comment ${result.data.id}.`)
+      info(`Added new comment : ${result.data.id}.`)
     }
   }
 

@@ -39688,7 +39688,7 @@ class OctokitClient {
                 body: comment,
                 comment_id: myComments[0].id
             });
-            (0, core_1.info)(`Updated comment ${myComments[0].id}.`);
+            (0, core_1.info)(`Updated comment : ${myComments[0].id}.`);
         }
         else {
             const result = await this.octokit.rest.issues.createComment({
@@ -39697,7 +39697,7 @@ class OctokitClient {
                 issue_number: this.pullRequestId,
                 body: comment
             });
-            (0, core_1.info)(`Added new comment ${result.data.id}.`);
+            (0, core_1.info)(`Added new comment : ${result.data.id}.`);
         }
     }
     async listFiles() {
