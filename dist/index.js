@@ -39803,15 +39803,17 @@ const executePrompt = async (prompt) => {
     const openai = new openai_1.default({
         apiKey: process.env['OPENAI_API_KEY']
     });
+    const messages = [];
+    if (core.getInput('openai_system_message')?.length > 0) {
+        messages.push({
+            role: 'system',
+            content: 'You are a SQL expert and knowledgeable about large datasets in Postgres version 15.'
+        });
+    }
+    messages.push({ role: 'user', content: prompt });
     const chatResult = await openai.chat.completions
         .create({
-        messages: [
-            {
-                role: 'system',
-                content: 'You are a SQL expert and knowledgeable about large datasets in Postgres version 15.'
-            },
-            { role: 'user', content: prompt }
-        ],
+        messages,
         model: core.getInput('openai_model') || process.env['OPENAI_MODEL'],
         temperature: Number(core.getInput('openai_temperature')),
         max_tokens: Number(core.getInput('openai_max_tokens'))

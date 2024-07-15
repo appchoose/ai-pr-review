@@ -31,6 +31,11 @@ inputs:
       deterministic.'
     required: false
     default: '0.5'
+  openai_system_message:
+    description:
+      'Message system context. Example : You are a SQL expert and knowledgeable about large datasets
+      in Postgres version 15.'
+    required: false
   openai_max_tokens:
     description: 'The maximum number of tokens to generate in the OpenAI response. Example: 1000'
     required: false
