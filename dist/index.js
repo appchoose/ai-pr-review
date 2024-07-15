@@ -39793,10 +39793,9 @@ async function run() {
 const generatePrompt = (contentToAnalyze) => {
     const prompt = `
     ${core.getInput('prompt') || process.env['PROMPT']} \n\n
-    Content : \n 
-    \`\`\`${contentToAnalyze}\`\`\`\n\n
-    Answer me in the following ${core.getInput('language')}:\n\n
-    Use markdown formatting for your response
+    Content : \n \`\`\`${contentToAnalyze}\`\`\`\n\n
+    Answer me in the following language ${core.getInput('language')}:\n\n
+    Use GitHub flavored markdown formatting for your response.\n\n
   `;
     core.info(`Prompt: ${prompt}`);
     return prompt;
