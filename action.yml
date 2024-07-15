@@ -1,25 +1,17 @@
-name: 'AI Pull Request reviewer'
-description: 'Provide a description here'
+name: 'AI Pull Request Reviewer'
+description: 'Comment your pull request with your own OpenAI prompt.'
 author: 'Choose'
 
-# Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
-  icon: 'heart'
+  icon: 'aperture'
   color: 'red'
 
-# Define your inputs here.
 inputs:
   github_token:
     description: 'Github API Key'
     required: true
   github_pr_id:
     description: 'Github PR ID'
-    required: true
-  github_repo:
-    description: 'Github repository'
-    required: true
-  github_owner:
-    description: 'Github owner'
     required: true
   prompt:
     description: 'Prompt to use for generating responses.'

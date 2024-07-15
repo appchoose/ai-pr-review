@@ -1,10 +1,8 @@
-import { getOctokit } from '@actions/github'
+import { getOctokit, context } from '@actions/github'
 import { info } from '@actions/core'
 
 interface OctokitClientOptions {
   authToken: string
-  repo: string
-  owner: string
   pullRequestId: string
 }
 
@@ -16,8 +14,8 @@ export class OctokitClient {
 
   constructor(options: OctokitClientOptions) {
     this.octokit = getOctokit(options.authToken)
-    this.repo = options.repo
-    this.owner = options.owner
+    this.repo = context.repo.repo
+    this.owner = context.repo.owner
     this.pullRequestId = Number(options.pullRequestId)
   }
 

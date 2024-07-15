@@ -20,17 +20,12 @@ export async function run(): Promise<void> {
       authToken:
         core.getInput('github_token') ||
         (process.env['GITHUB_TOKEN_ID'] as string),
-      owner:
-        core.getInput('github_owner') ||
-        (process.env['GITHUB_OWNER'] as string),
-      repo:
-        core.getInput('github_repo') || (process.env['GITHUB_REPO'] as string),
       pullRequestId:
         core.getInput('github_pr_id') || (process.env['GITHUB_PR_ID'] as string)
     })
 
     const files = await octokit.listFiles()
-    let filesContent = ''
+    let concatenatedFilesContent = ''
 
     // eslint-disable-next-line github/array-foreach
     files
@@ -40,20 +35,26 @@ export async function run(): Promise<void> {
         )
       )
       .forEach(modifiedFile => {
-        filesContent += modifiedFile.patch
+        concatenatedFilesContent += modifiedFile.patch
       })
+
+    if (!concatenatedFilesContent) {
+      core.info('Nothing to analyze')
+      return
+    }
 
     const openai = new OpenAI({
       apiKey: process.env['OPENAI_API_KEY']
     })
 
-    const finalPrompt = `${prompt} ${filesContent}`
+    const finalPrompt = `${prompt} ${concatenatedFilesContent}`
     const chatResult = await openai.chat.completions
       .create({
         messages: [{ role: 'user', content: finalPrompt }],
         model:
           core.getInput('openai_model') ||
-          (process.env['OPENAI_MODEL'] as string)
+          (process.env['OPENAI_MODEL'] as string),
+        temperature: Number(core.getInput('openai_temperature'))
       })
       .asResponse()
 

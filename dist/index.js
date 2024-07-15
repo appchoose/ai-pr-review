@@ -39665,8 +39665,8 @@ class OctokitClient {
     pullRequestId;
     constructor(options) {
         this.octokit = (0, github_1.getOctokit)(options.authToken);
-        this.repo = options.repo;
-        this.owner = options.owner;
+        this.repo = github_1.context.repo.repo;
+        this.owner = github_1.context.repo.owner;
         this.pullRequestId = Number(options.pullRequestId);
     }
     async getAuthenticatedUserId() {
@@ -39767,28 +39767,30 @@ async function run() {
         const octokit = new github_1.OctokitClient({
             authToken: core.getInput('github_token') ||
                 process.env['GITHUB_TOKEN_ID'],
-            owner: core.getInput('github_owner') ||
-                process.env['GITHUB_OWNER'],
-            repo: core.getInput('github_repo') || process.env['GITHUB_REPO'],
             pullRequestId: core.getInput('github_pr_id') || process.env['GITHUB_PR_ID']
         });
         const files = await octokit.listFiles();
-        let filesContent = '';
+        let concatenatedFilesContent = '';
         // eslint-disable-next-line github/array-foreach
         files
             .filter(file => file.filename.startsWith(core.getInput('files_path') || process.env['FILES_PATH']))
             .forEach(modifiedFile => {
-            filesContent += modifiedFile.patch;
+            concatenatedFilesContent += modifiedFile.patch;
         });
+        if (!concatenatedFilesContent) {
+            core.info('Nothing to analyze');
+            return;
+        }
         const openai = new openai_1.default({
             apiKey: process.env['OPENAI_API_KEY']
         });
-        const finalPrompt = `${prompt} ${filesContent}`;
+        const finalPrompt = `${prompt} ${concatenatedFilesContent}`;
         const chatResult = await openai.chat.completions
             .create({
             messages: [{ role: 'user', content: finalPrompt }],
             model: core.getInput('openai_model') ||
-                process.env['OPENAI_MODEL']
+                process.env['OPENAI_MODEL'],
+            temperature: Number(core.getInput('openai_temperature'))
         })
             .asResponse();
         const response = await chatResult.json();
