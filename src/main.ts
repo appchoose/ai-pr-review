@@ -56,6 +56,9 @@ const generatePrompt = (contentToAnalyze: string): string => {
     Answer me in the following ${core.getInput('language')}:\n\n
     Use markdown formatting for your response
   `
+
+  core.info(`Prompt: ${prompt}`)
+
   return prompt
 }
 
