@@ -1,23 +1,49 @@
-name: 'The name of your action here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'AI Pull Request Reviewer'
+description: 'Comment your pull request with your own OpenAI prompt.'
+author: 'Choose'
 
-# Add your action's branding here. This will appear on the GitHub Marketplace.
 branding:
-  icon: 'heart'
+  icon: 'aperture'
   color: 'red'
 
-# Define your inputs here.
 inputs:
-  milliseconds:
-    description: 'Your input description here'
+  github_token:
+    description: 'Github API Key'
     required: true
-    default: '1000'
-
-# Define your outputs here.
-outputs:
-  time:
-    description: 'Your output description here'
+  github_pr_id:
+    description: 'Github PR ID'
+    required: true
+  prompt:
+    description: 'Prompt to use for generating responses.'
+    required: true
+  openai_model:
+    description:
+      "The OpenAI model to use for generating responses. Examples: 'gpt-3.5-turbo', 'gpt-4'"
+    required: false
+    default: 'gpt-3.5-turbo'
+  files_path:
+    description: 'Files path to analyze.'
+    required: true
+  openai_temperature:
+    description:
+      'The temperature for OpenAI responses. Controls the creativity of the responses. Higher values
+      (e.g., 0.9) make output more random, while lower values (e.g., 0.1) make it more focused and
+      deterministic.'
+    required: false
+    default: '0.5'
+  openai_system_message:
+    description:
+      'Message system context. Example : You are a SQL expert and knowledgeable about large datasets
+      in Postgres version 15.'
+    required: false
+  openai_max_tokens:
+    description: 'The maximum number of tokens to generate in the OpenAI response. Example: 1000'
+    required: false
+    default: '2048'
+  language:
+    description: 'The language for the code review'
+    required: false
+    default: 'en' # English as the default language
 
 runs:
   using: node20
