@@ -54,7 +54,7 @@ const generatePrompt = (contentToAnalyze: string): string => {
     ${core.getInput('prompt') || (process.env['PROMPT'] as string)} \n\n
     Content : \n \`\`\`${contentToAnalyze}\`\`\`\n\n
     Answer me in the following language ${core.getInput('language')}:\n\n
-    Your answer will be posted as a GitHub pull request comment, please use appropriated format.\n\n
+    Use markdown formatting for your response.\n\n
   `
 
   core.info(`Prompt: ${prompt}`)
