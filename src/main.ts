@@ -51,11 +51,9 @@ export async function run(): Promise<void> {
 
 const generatePrompt = (contentToAnalyze: string): string => {
   const prompt = `
-    ${core.getInput('prompt') || (process.env['PROMPT'] as string)} \n\n
-    Answer me in the following language ${core.getInput('language')}:\n\n
-    Use markdown formatting for your response.\n\n
+    ${core.getInput('prompt') || (process.env['PROMPT'] as string)} \n
+    Answer me in the following language ${core.getInput('language')}:\n
     Content : \n \`\`\`${contentToAnalyze}\`\`\`\n\n
-    
   `
 
   core.info(`Prompt: ${prompt}`)
@@ -73,8 +71,13 @@ const executePrompt = async (
   const chatResult = await openai.chat.completions
     .create({
       messages: [
-        {role: "system", content: "You are a SQL expert and knowledgeable about large datasets in Postgres version 15."},
-        { role: 'user', content: prompt }],
+        {
+          role: 'system',
+          content:
+            'You are a SQL expert and knowledgeable about large datasets in Postgres version 15.'
+        },
+        { role: 'user', content: prompt }
+      ],
       model: core.getInput('openai_model') || (process.env['OPENAI_MODEL'] as string),
       temperature: Number(core.getInput('openai_temperature')),
       max_tokens: Number(core.getInput('openai_max_tokens'))

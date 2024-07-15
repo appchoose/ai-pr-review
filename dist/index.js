@@ -39792,11 +39792,9 @@ async function run() {
 }
 const generatePrompt = (contentToAnalyze) => {
     const prompt = `
-    ${core.getInput('prompt') || process.env['PROMPT']} \n\n
-    Answer me in the following language ${core.getInput('language')}:\n\n
-    Use markdown formatting for your response.\n\n
+    ${core.getInput('prompt') || process.env['PROMPT']} \n
+    Answer me in the following language ${core.getInput('language')}:\n
     Content : \n \`\`\`${contentToAnalyze}\`\`\`\n\n
-    
   `;
     core.info(`Prompt: ${prompt}`);
     return prompt;
@@ -39808,7 +39806,10 @@ const executePrompt = async (prompt) => {
     const chatResult = await openai.chat.completions
         .create({
         messages: [
-            { role: "system", content: "You are a SQL expert and knowledgeable about large datasets in Postgres version 15." },
+            {
+                role: 'system',
+                content: 'You are a SQL expert and knowledgeable about large datasets in Postgres version 15.'
+            },
             { role: 'user', content: prompt }
         ],
         model: core.getInput('openai_model') || process.env['OPENAI_MODEL'],
