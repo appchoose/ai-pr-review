@@ -17,7 +17,7 @@ The bot will create and try to update (if existing) a comment with OpenAI result
        timeout-minutes: 3
        runs-on: ubuntu-latest
        steps:
-         - name: "Checkout code"
+         - name: 'Checkout code'
            uses: actions/checkout@v4
          - name: Generate prompt
            run: |
@@ -25,27 +25,27 @@ The bot will create and try to update (if existing) a comment with OpenAI result
              Please precise if each query will locks the table, which type of postgres lock it will uses and if it will prevents other transactions from reading or writing to the table.
              Answer with suggestions and recommendations for how to avoid it (do not include NOWAIT option). Include indexes suggestions if you think he can speed up any query.
              Your answer should follow the following format :
-   
+
                ## Query 1:
                    \`\`\`sql
                    <SQL Query>
                    \`\`\`
                    Locking Analysis:
                      - <start with a warning emoji if this lock the database, then detailed analysis with bold result of the locking result>
-   
+
                    Suggestions/Alternatives:
                      - <Detailed suggestions>
-   
+
                ## Query 2:
                    \`\`\`sql
                    <SQL Query>
                    \`\`\`
                    Locking Analysis:
                      - <start with a warning emoji if this lock the database, then detailed analysis with bold result of the locking result>
-   
+
                    Suggestions/Alternatives:
                      - <Detailed suggestions>" >> prompt.txt
-   
+
               echo OPENAI_PROMPT=$(cat prompt.txt) >> $GITHUB_ENV
               echo OPENAI_SYSTEM_MESSAGE="You are a SQL expert and knowledgeable about large datasets in Postgres version $POSTGRES_VERSION."
            env:
@@ -55,9 +55,9 @@ The bot will create and try to update (if existing) a comment with OpenAI result
            with:
              prompt: ${{ env.OPENAI_PROMPT }}
              openai_system_message: ${{ env.OPENAI_SYSTEM_MESSAGE }}
-             openai_model: "gpt-4"
+             openai_model: 'gpt-4'
              openai_temperature: 0.1
-             files_path: "path/to/your/migrations/folders"
+             files_path: 'path/to/your/migrations/folders'
              github_token: ${{ secrets.AI_PR_REVIEW_GITHUB_TOKEN }}
              github_pr_id: ${{ github.event.pull_request.number }}
            env:

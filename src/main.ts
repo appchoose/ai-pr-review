@@ -30,7 +30,11 @@ export async function run(): Promise<void> {
         )
       )
       .forEach(modifiedFile => {
-        concatenatedFilesContent += modifiedFile.patch?.replace(/@@(.*)+@@/, '').trim()
+        concatenatedFilesContent += modifiedFile.patch
+          ?.replace(/@@(.*)+@@/, '')
+          .replace(/\*[\s\S]*?\*/, '')
+          .replace('No newline at end of file', '')
+          .trim()
       })
 
     if (!concatenatedFilesContent) {

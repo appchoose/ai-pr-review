@@ -39701,7 +39701,7 @@ class OctokitClient {
         }
     }
     async listFiles() {
-        const { data: files } = await this.octokit.rest.pulls.listFiles({
+        const files = await this.octokit.paginate(this.octokit.rest.pulls.listFiles, {
             owner: this.owner,
             repo: this.repo,
             pull_number: this.pullRequestId,
@@ -39773,7 +39773,11 @@ async function run() {
         files
             .filter(file => file.filename.startsWith(core.getInput('files_path') || process.env['FILES_PATH']))
             .forEach(modifiedFile => {
-            concatenatedFilesContent += modifiedFile.patch?.replace(/@@(.*)+@@/, '').trim();
+            concatenatedFilesContent += modifiedFile.patch
+                ?.replace(/@@(.*)+@@/, '')
+                .replace(/\*[\s\S]*?\*/, '')
+                .replace('No newline at end of file', '')
+                .trim();
         });
         if (!concatenatedFilesContent) {
             core.info('No files is matching the given files_path.');

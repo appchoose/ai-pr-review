@@ -56,7 +56,7 @@ export class OctokitClient {
   }
 
   async listFiles(): Promise<{ filename: string; patch?: string | undefined }[]> {
-    const { data: files } = await this.octokit.rest.pulls.listFiles({
+    const files = await this.octokit.paginate(this.octokit.rest.pulls.listFiles, {
       owner: this.owner,
       repo: this.repo,
       pull_number: this.pullRequestId,
