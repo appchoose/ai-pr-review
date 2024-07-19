@@ -1,4 +1,4 @@
-import { getOctokit, context, } from '@actions/github'
+import { getOctokit, context } from '@actions/github'
 import { info } from '@actions/core'
 
 interface OctokitClientOptions {
