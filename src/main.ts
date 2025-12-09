@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import OpenAI from 'openai'
 import { OctokitClient } from './github'
-import { ChatCompletionMessageParam } from 'openai/src/resources/chat/completions'
+import { ChatCompletionMessageParam } from 'openai/resources'
 
 /**
  * The main function for the action.
@@ -87,8 +87,8 @@ const executePrompt = async (
     .create({
       messages,
       model: core.getInput('openai_model') || (process.env['OPENAI_MODEL'] as string),
-      temperature: Number(core.getInput('openai_temperature')),
-      max_tokens: Number(core.getInput('openai_max_tokens'))
+      max_tokens: Number(core.getInput('openai_max_tokens')),
+      reasoning_effort:  "high" as const
     })
     .asResponse()
 
