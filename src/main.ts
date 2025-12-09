@@ -88,7 +88,7 @@ const executePrompt = async (
       messages,
       model: core.getInput('openai_model') || (process.env['OPENAI_MODEL'] as string),
       max_tokens: Number(core.getInput('openai_max_tokens')),
-      reasoning_effort:  "high" as const
+      reasoning_effort: 'high' as const
     })
     .asResponse()
 
