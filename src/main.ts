@@ -87,7 +87,7 @@ const executePrompt = async (
     .create({
       messages,
       model: core.getInput('openai_model') || (process.env['OPENAI_MODEL'] as string),
-      reasoning_effort: 'high' as const
+      reasoning_effort: 'xhigh'
     })
     .asResponse()
 
