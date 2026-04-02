@@ -30094,7 +30094,17 @@ const executePrompt = async (prompt) => {
     if (core.getInput('openai_system_message')?.length > 0) {
         messages.push({
             role: 'system',
-            content: 'You are a SQL expert and knowledgeable about large datasets in Postgres version 15.'
+            content: `You are a SQL expert specializing in PostgreSQL 18 and large-scale databases.
+
+Key context about the production environment:
+- Several tables contain millions of rows. Always consider query performance and lock impact.
+- Use CONCURRENTLY for index creation (CREATE INDEX CONCURRENTLY) to avoid blocking reads/writes on large tables.
+- For schema changes on large tables (e.g., adding a NOT NULL constraint), prefer a safe multi-step approach:
+  1. Add the constraint as NOT VALID first.
+  2. Backfill or fix data if needed.
+  3. VALIDATE the constraint in a separate step.
+- The ORM is Prisma. Prisma runs each migration file in a single transaction, which is incompatible with CREATE INDEX CONCURRENTLY and long-running validation steps. When these operations are needed, split them into separate migration files and mark them with -- @unsafe (so Prisma runs them outside a transaction).
+- Always flag migrations that could lock a table for an extended period on millions of rows.`
         });
     }
     messages.push({ role: 'user', content: prompt });
