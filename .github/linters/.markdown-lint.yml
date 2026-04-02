@@ -1,3 +1,6 @@
+# Line length
+MD013: false
+
 # Unordered list style
 MD004:
   style: dash
