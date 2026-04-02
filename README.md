@@ -1,11 +1,11 @@
 # AI Pull Request Review
 
-This action has been created to use OpenAI API to performs some custom analysis on pull request.  
+This action has been created to use OpenAI API to performs some custom analysis on pull request.
 The bot will create and try to update (if existing) a comment with OpenAI result.
 
 ## Example usage
 
-> [!WARNING]  
+> [!WARNING]
 > A personal GitHub token with at least `read:user, repo` scopes is needed.
 
 1. Detect if your Pull Request SQL migration will lock your database :
