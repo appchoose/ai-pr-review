@@ -30114,7 +30114,7 @@ Key context about the production environment:
             .create({
             messages,
             model: core.getInput('openai_model') || process.env['OPENAI_MODEL'],
-            reasoning_effort: 'xhigh'
+            reasoning_effort: 'high'
         })
             .asResponse();
         core.info(`Chat result :`);
