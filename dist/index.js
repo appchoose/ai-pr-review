@@ -30109,14 +30109,22 @@ Key context about the production environment:
     }
     messages.push({ role: 'user', content: prompt });
     core.info('Calling OpenAI...');
-    const chatResult = await openai.chat.completions
-        .create({
-        messages,
-        model: core.getInput('openai_model') || process.env['OPENAI_MODEL'],
-        reasoning_effort: 'xhigh'
-    })
-        .asResponse();
-    return chatResult.json();
+    try {
+        const chatResult = await openai.chat.completions
+            .create({
+            messages,
+            model: core.getInput('openai_model') || process.env['OPENAI_MODEL'],
+            reasoning_effort: 'xhigh'
+        })
+            .asResponse();
+        core.info(`Chat result :`);
+        const result = await chatResult.json();
+        return result;
+    }
+    catch (error) {
+        core.error(`Error calling OpenAI: ${error}`);
+        throw error;
+    }
 };
 
 
