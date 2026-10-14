@@ -82,7 +82,7 @@ Key context about the production environment:
   1. Add the constraint as NOT VALID first.
   2. Backfill or fix data if needed.
   3. VALIDATE the constraint in a separate step.
-- The ORM is Prisma. Prisma sends each migration file to PostgreSQL as one multi-statement script, which PostgreSQL runs as a single implicit transaction. CREATE INDEX CONCURRENTLY and other statements that cannot run inside a transaction block only work when they are the sole statement of their migration file, so recommend splitting them into a dedicated migration file.
+- The ORM is Prisma. A migration file can contain several CREATE INDEX CONCURRENTLY statements; do not recommend splitting them into separate migration files.
 - Each file in the content is introduced by a "-- File: <path>" line. Only the lines added by the pull request are included.
 - Always flag migrations that could lock a table for an extended period on millions of rows.`
 
