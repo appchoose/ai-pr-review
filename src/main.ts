@@ -19,23 +19,11 @@ export async function run(): Promise<void> {
       pullRequestId: core.getInput('github_pr_id') || (process.env['GITHUB_PR_ID'] as string)
     })
 
-    let concatenatedFilesContent = ''
+    const filesPath = core.getInput('files_path') || (process.env['FILES_PATH'] as string)
     const files = await octokit.listFiles()
-
-    // eslint-disable-next-line github/array-foreach
-    files
-      .filter(file =>
-        file.filename.startsWith(
-          core.getInput('files_path') || (process.env['FILES_PATH'] as string)
-        )
-      )
-      .forEach(modifiedFile => {
-        concatenatedFilesContent += modifiedFile.patch
-          ?.replace(/@@(.*)+@@/, '')
-          .replace(/\*[\s\S]*?\*/, '')
-          .replace('No newline at end of file', '')
-          .trim()
-      })
+    const concatenatedFilesContent = formatFiles(
+      files.filter(file => file.filename.startsWith(filesPath))
+    )
 
     if (!concatenatedFilesContent) {
       core.info('No files is matching the given files_path.')
@@ -53,6 +41,26 @@ export async function run(): Promise<void> {
   }
 }
 
+/**
+ * Keeps only the lines each file adds, so the model never mistakes a removed
+ * line or a hunk header for a statement that will run, and prefixes each file
+ * with its name so statements from different migrations stay distinguishable.
+ */
+export const formatFiles = (files: { filename: string; patch?: string | undefined }[]): string =>
+  files
+    .map(file => {
+      const addedLines = (file.patch ?? '')
+        .split('\n')
+        .filter(line => line.startsWith('+'))
+        .map(line => line.slice(1))
+        .join('\n')
+        .trim()
+
+      return addedLines ? `-- File: ${file.filename}\n${addedLines}` : ''
+    })
+    .filter(Boolean)
+    .join('\n\n')
+
 const generatePrompt = (contentToAnalyze: string): string => {
   const prompt = `
     ${core.getInput('prompt') || (process.env['PROMPT'] as string)} \n
@@ -65,18 +73,7 @@ const generatePrompt = (contentToAnalyze: string): string => {
   return prompt
 }
 
-const executePrompt = async (
-  prompt: string
-): Promise<{ choices: { message: { content: string } }[] }> => {
-  const openai = new OpenAI({
-    apiKey: process.env['OPENAI_API_KEY']
-  })
-
-  const messages: ChatCompletionMessageParam[] = []
-  if (core.getInput('openai_system_message')?.length > 0) {
-    messages.push({
-      role: 'system',
-      content: `You are a SQL expert specializing in PostgreSQL 18 and large-scale databases.
+const DEFAULT_SYSTEM_MESSAGE = `You are a SQL expert specializing in PostgreSQL 18 and large-scale databases.
 
 Key context about the production environment:
 - Several tables contain millions of rows. Always consider query performance and lock impact.
@@ -85,10 +82,25 @@ Key context about the production environment:
   1. Add the constraint as NOT VALID first.
   2. Backfill or fix data if needed.
   3. VALIDATE the constraint in a separate step.
-- The ORM is Prisma. Prisma runs each migration file in a single transaction, which is incompatible with CREATE INDEX CONCURRENTLY and long-running validation steps. When these operations are needed, split them into separate migration files and mark them with -- @unsafe (so Prisma runs them outside a transaction).
+- The ORM is Prisma. Prisma sends each migration file to PostgreSQL as one multi-statement script, which PostgreSQL runs as a single implicit transaction. CREATE INDEX CONCURRENTLY and other statements that cannot run inside a transaction block only work when they are the sole statement of their migration file, so recommend splitting them into a dedicated migration file.
+- Each file in the content is introduced by a "-- File: <path>" line. Only the lines added by the pull request are included.
 - Always flag migrations that could lock a table for an extended period on millions of rows.`
-    })
-  }
+
+const executePrompt = async (
+  prompt: string
+): Promise<{ choices: { message: { content: string } }[] }> => {
+  const openai = new OpenAI({
+    apiKey: process.env['OPENAI_API_KEY']
+  })
+
+  const messages: ChatCompletionMessageParam[] = []
+  const systemMessage = core.getInput('openai_system_message')
+  messages.push({
+    role: 'system',
+    content: systemMessage
+      ? `${DEFAULT_SYSTEM_MESSAGE}\n\n${systemMessage}`
+      : DEFAULT_SYSTEM_MESSAGE
+  })
   messages.push({ role: 'user', content: prompt })
 
   core.info('Calling OpenAI...')
